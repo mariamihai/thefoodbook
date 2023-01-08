@@ -73,10 +73,11 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: golangci-lint.xml
-          path: ./files
+# Not using the results from golangci-lint yet
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: golangci-lint.xml
+#          path: ./files
 
       - uses: actions/download-artifact@v3
         with:
