@@ -23,6 +23,7 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
 
+      # Good enough for now - will import results to sonar later
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
@@ -41,8 +42,66 @@ jobs:
           check-latest: true
           go-version-file: ./go.mod
 
-      - name: Test
-        run: go test -v ./...
+      - run: mkdir -p ./files
+
+      - name: Test & Generate Coverage and Report
+        run: |
+          go test "./..." -coverprofile="./files/coverage.out" -covermode=count -json > ./files/report.json
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage.out
+          path: ./files/coverage.out
+          if-no-files-found: warn
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: report.json
+          path: ./files/report.json
+          if-no-files-found: warn
+
+      - name: Display structure of files
+        run: ls -R
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: golangci-lint.xml
+          path: ./files
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: coverage.out
+          path: ./files
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: report.json
+          path: ./files
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.go.tests.reportPath=files/report.json
+            -Dsonar.go.coverage.reportPaths=files/coverage.out
+            -Dsonar.go.golangci-lint.reportPaths=files/golangci-lint.xml
+            -Dsonar.sources=.
 
   build:
     name: Build
