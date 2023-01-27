@@ -11,4 +11,4 @@ lint:
 		-v $(shell pwd):/app \
 		-w /app \
 		golangci/golangci-lint:latest-alpine golangci-lint run --deadline=65s $(OUTPUT_OPTIONS) -v
-		-c ./.golangci.yml
+		--config=./.golangci.yml
