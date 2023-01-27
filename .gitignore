@@ -1,3 +1,6 @@
 /.idea/
 /vendor/
 /cmd.exe
+/.env.development.local
+/.env.test.local
+/.env.production.local
