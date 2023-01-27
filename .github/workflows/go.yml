@@ -20,14 +20,23 @@ jobs:
           check-latest: true
           go-version-file: ./go.mod
 
-      - name: Verify dependencies
-        run: go mod verify
-
-      # Good enough for now - will import results to sonar later
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
+          args: -v -c ./.golangci.yml
+
+          # show only new issues if it's a pull request
+          # only-new-issues: true
+
+          # all caching functionality will be complete disabled, takes precedence over all other caching options
+          # skip-cache: true
+
+          # don't cache or restore ~/go/pkg.
+          # skip-pkg-cache: true
+
+          # don't cache or restore ~/.cache/go-build.
+          # skip-build-cache: true
 
   test:
     name: Test
@@ -41,6 +50,9 @@ jobs:
         with:
           check-latest: true
           go-version-file: ./go.mod
+
+      - name: Verify dependencies
+        run: go mod verify
 
       - run: mkdir -p ./files
 
@@ -73,12 +85,6 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
 
-# Not using the results from golangci-lint yet
-#      - uses: actions/download-artifact@v3
-#        with:
-#          name: golangci-lint.xml
-#          path: ./files
-
       - uses: actions/download-artifact@v3
         with:
           name: coverage.out
@@ -101,7 +107,6 @@ jobs:
           args: >
             -Dsonar.go.tests.reportPath=files/report.json
             -Dsonar.go.coverage.reportPaths=files/coverage.out
-            -Dsonar.go.golangci-lint.reportPaths=files/golangci-lint.xml
             -Dsonar.sources=.
 
   build:

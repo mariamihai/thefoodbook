@@ -1,36 +1,64 @@
 package configs
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
-func InitializeConfiguration() Config {
-	return InitializeConfigurationForFilename("../local.env")
-}
+// NewConfig Order of config loading files: https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
+func NewConfig() (*Config, error) {
+	var config Config
 
-func InitializeConfigurationForFilename(filename string) Config {
-	err := godotenv.Load(filename)
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		log.Println("ENVIRONMENT variable was not set. Will default to 'development'.")
+		env = "development"
+	}
+	config.Environment = env
+	log.Printf("Loading environment variables for '%s'.", config.Environment)
+
+	err := godotenv.Load(".env." + env + ".local")
 	if err != nil {
-		log.Fatalf("Error encountered when loading the configuration: %s", err)
+		log.Printf("Missing '.env.%s.local'. Using '.env.%s instead'.", env, env)
+	}
+	if env != "test" {
+		log.Println("This is not a test environment. Will be using '.env.local'.")
+		err = godotenv.Load(".env.local")
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = godotenv.Load(".env." + env)
+	if err != nil {
+		log.Printf("Missing '.env.%s'.", env)
+		return nil, err
 	}
 
-	var config Config
+	// When added .env file
+	//err = godotenv.Load()
+
+	config.DBUri = os.Getenv("DB_URI")
+	config.DBUser = os.Getenv("DB_USER")
+	config.DBPass = os.Getenv("DB_PASS")
+
 	config.Port, err = strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
-		log.Fatalf("couldn't get configured PORT: %s", err)
+		config.Port = 3000
 	}
 
-	return config
+	return &config, nil
 }
 
 type Config struct {
+	Environment string
+
 	Port int
 
-	// TODO - connect to neo4j
-	Uri      string
-	Username string
-	Password string
+	// DB
+	DBUri  string
+	DBUser string
+	DBPass string
 }
