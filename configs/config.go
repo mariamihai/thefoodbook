@@ -13,7 +13,7 @@ func NewConfig() (*Config, error) {
 	var config Config
 
 	env := os.Getenv("ENVIRONMENT")
-	if "" == env {
+	if env == "" {
 		log.Println("ENVIRONMENT variable was not set. Will default to 'development'.")
 		env = "development"
 	}
@@ -24,7 +24,7 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		log.Printf("Missing '.env.%s.local'. Using '.env.%s instead'.", env, env)
 	}
-	if "test" != env {
+	if env != "test" {
 		log.Println("This is not a test environment. Will be using '.env.local'.")
 		err = godotenv.Load(".env.local")
 		if err != nil {
