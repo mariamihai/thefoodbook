@@ -1,10 +1,11 @@
 package configs
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 // NewConfig Order of config loading files: https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use

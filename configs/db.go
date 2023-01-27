@@ -2,8 +2,9 @@ package configs
 
 import (
 	"context"
-	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"log"
+
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 func NewDriver(ctx context.Context, uri, username, password string) (neo4j.DriverWithContext, error) {

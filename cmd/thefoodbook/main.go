@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/mariamihai/thefoodbook/configs"
 	"log"
 	"time"
+
+	"github.com/mariamihai/thefoodbook/configs"
 )
 
 func main() {
